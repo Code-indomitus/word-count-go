@@ -24,52 +24,75 @@ func main() {
 	flag.Parse()
 
 	// Get the file name to be read
-	fileName := os.Args[len(os.Args)-1]
+	filePath := os.Args[len(os.Args)-1]
 
-	// Open the file that has been passed as an argument
-	file, err := os.Open(fileName)
-	if err != nil {
-		fmt.Println("wc:", fileName+":", "No such file or directory")
-		return
+	// Check if the content is to be read from standard input
+	readFromStdin := false
+	if len(os.Args) == 1 || (len(os.Args) > 1 && strings.HasPrefix(filePath, "-")) {
+		readFromStdin = true
 	}
 
-	// Close the file later
-	defer file.Close()
+	if readFromStdin {
+		processStdIn()
+	} else {
+		// Open the file that has been passed as an argument
+		file, err := os.Open(filePath)
+		if err != nil {
+			fmt.Println("wc:", filePath+":", "No such file or directory")
+			return
+		}
+		// Close the file later
+		defer file.Close()
 
+		// Process the file
+		processFile(file, filePath)
+	}
+}
+
+func processFile(file *os.File, filePath string) {
 	// Execute the appropriate functions based on the flags
 	if byteCountFlag {
-		fmt.Println(getByteCount(file), fileName)
+		fmt.Println(getByteCountFile(file), filePath)
 	}
 
 	if lineCountFlag {
-		fmt.Println(getLineCount(file), fileName)
+		fmt.Println(getLineCountFile(file), filePath)
 	}
 
 	if wordCountFlag {
-		fmt.Println(getWordCount(file), fileName)
+		fmt.Println(getWordCountFile(file), filePath)
 	}
 
 	if charCountFlag {
-		fmt.Println(getCharCount(file), fileName)
+		fmt.Println(getCharCountFile(file), filePath)
 	}
 
 	// If no flags are provided, print all
 	if len(os.Args) == 2 {
-		fmt.Println(getLineCount(file), getWordCount(file), getByteCount(file), fileName)
+		fmt.Println(getLineCountFile(file), getWordCountFile(file), getByteCountFile(file), filePath)
 	}
 }
 
-func getByteCount(file *os.File) int64 {
+func processStdIn() {
+	// Execute the appropriate functions based on the flags
+	if lineCountFlag {
+		fmt.Println(getLineCountStdIn())
+	}
+
+	//TODO: Implement the rest of the flags for standard input
+}
+
+func getByteCountFile(file *os.File) int64 {
 	resetFilePointer(file)
 
 	// Read file as a buffer
 	reader := bufio.NewReader(file)
 
 	var byteCount int64 = 0
+	chunk := make([]byte, 1024)
 
 	for {
 		// Read a chunk of 1kB of data from the file at at time
-		chunk := make([]byte, 1024)
 		bytesRead, err := reader.Read(chunk)
 		if err != nil && err.Error() != "EOF" {
 			fmt.Println("Error:", err)
@@ -88,7 +111,7 @@ func getByteCount(file *os.File) int64 {
 	return byteCount
 }
 
-func getLineCount(file *os.File) int64 {
+func getLineCountFile(file *os.File) int64 {
 	resetFilePointer(file)
 
 	// Initialize file scanner
@@ -104,7 +127,7 @@ func getLineCount(file *os.File) int64 {
 	return lineCount
 }
 
-func getWordCount(file *os.File) int64 {
+func getWordCountFile(file *os.File) int64 {
 	resetFilePointer(file)
 	// Initialize file scanner
 	fileScanner := bufio.NewScanner(file)
@@ -122,7 +145,7 @@ func getWordCount(file *os.File) int64 {
 	return wordCount
 }
 
-func getCharCount(file *os.File) int64 {
+func getCharCountFile(file *os.File) int64 {
 	//TODO: Fix faulty character count and newline count
 	resetFilePointer(file)
 
@@ -151,4 +174,16 @@ func resetFilePointer(file *os.File) {
 	if err != nil {
 		fmt.Println("Error:", err)
 	}
+}
+
+func getLineCountStdIn() int64 {
+	var lineCount int64 = 0
+	scanner := bufio.NewScanner(os.Stdin)
+
+	// Read input line by line
+	for scanner.Scan() {
+		lineCount++
+	}
+
+	return lineCount
 }
