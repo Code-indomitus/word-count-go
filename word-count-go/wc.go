@@ -21,13 +21,7 @@ func main() {
 	flag.BoolVar(&wordCountFlag, "w", false, "print the word counts")
 	flag.BoolVar(&charCountFlag, "m", false, "print the character counts")
 
-	// flag.BoolVar(&byteCountFlag, "bytes", false, "print the byte counts") TODO remove this later
 	flag.Parse()
-
-	//TODO: Remove this later
-	// fmt.Println(len(os.Args))
-
-	// fmt.Println("byteCountFlag:", byteCountFlag)
 
 	// Get the file name to be read
 	fileName := os.Args[len(os.Args)-1]
@@ -44,23 +38,23 @@ func main() {
 
 	// Execute the appropriate functions based on the flags
 	if byteCountFlag {
-		printByteCount(file, fileName)
+		fmt.Println(getByteCount(file), fileName)
 	}
 
 	if lineCountFlag {
-		printLineCount(file, fileName)
+		fmt.Println(getLineCount(file), fileName)
 	}
 
 	if wordCountFlag {
-		printWordCount(file, fileName)
+		fmt.Println(getWordCount(file), fileName)
 	}
 
 	if charCountFlag {
-		printCharCount(file, fileName)
+		fmt.Println(getCharCount(file), fileName)
 	}
 }
 
-func printByteCount(file *os.File, fileName string) {
+func getByteCount(file *os.File) int64 {
 	// Read file as a buffer
 	reader := bufio.NewReader(file)
 
@@ -72,7 +66,7 @@ func printByteCount(file *os.File, fileName string) {
 		bytesRead, err := reader.Read(chunk)
 		if err != nil && err.Error() != "EOF" {
 			fmt.Println("Error:", err)
-			return
+			return -1
 		}
 
 		// If no bytes were read, we've reached the end of the file
@@ -84,10 +78,10 @@ func printByteCount(file *os.File, fileName string) {
 		byteCount += int64(bytesRead)
 	}
 
-	fmt.Println(byteCount, fileName)
+	return byteCount
 }
 
-func printLineCount(file *os.File, fileName string) {
+func getLineCount(file *os.File) int64 {
 	// Initialize file scanner
 	fileScanner := bufio.NewScanner(file)
 
@@ -98,10 +92,10 @@ func printLineCount(file *os.File, fileName string) {
 		lineCount++
 	}
 
-	fmt.Println(lineCount, fileName)
+	return lineCount
 }
 
-func printWordCount(file *os.File, fileName string) {
+func getWordCount(file *os.File) int64 {
 	// Initialize file scanner
 	fileScanner := bufio.NewScanner(file)
 
@@ -115,10 +109,12 @@ func printWordCount(file *os.File, fileName string) {
 		wordCount += int64(len(strings.Fields(line)))
 	}
 
-	fmt.Println(wordCount, fileName)
+	return wordCount
 }
 
-func printCharCount(file *os.File, fileName string) {
+func getCharCount(file *os.File) int64 {
+	//TODO: Fix faulty character count and newline count
+
 	// Initialize file scanner
 	fileScanner := bufio.NewScanner(file)
 
@@ -130,7 +126,10 @@ func printCharCount(file *os.File, fileName string) {
 
 		// Increment word count by number of words in the line
 		charCount += int64(len(line))
+
+		// Add the newline character
+		charCount++
 	}
 
-	fmt.Println(charCount, fileName)
+	return charCount
 }
