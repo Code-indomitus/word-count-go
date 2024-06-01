@@ -162,8 +162,6 @@ func getCharCountFile(file *os.File) int64 {
 
 		// // Add the newline character
 		charCount++
-
-		fmt.Println("Line:", line)
 	}
 
 	// Remove the last newline character
