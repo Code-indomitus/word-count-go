@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"unicode/utf8"
 )
 
 // Declare the flag options of word count
@@ -146,9 +147,7 @@ func getWordCountFile(file *os.File) int64 {
 }
 
 func getCharCountFile(file *os.File) int64 {
-	//TODO: Fix faulty character count and newline count
 	resetFilePointer(file)
-
 	// Initialize file scanner
 	fileScanner := bufio.NewScanner(file)
 
@@ -159,11 +158,16 @@ func getCharCountFile(file *os.File) int64 {
 		line := fileScanner.Text()
 
 		// Increment word count by number of words in the line
-		charCount += int64(len(line))
+		charCount += int64(utf8.RuneCountInString(line))
 
-		// Add the newline character
+		// // Add the newline character
 		charCount++
+
+		fmt.Println("Line:", line)
 	}
+
+	// Remove the last newline character
+	charCount--
 
 	return charCount
 }
