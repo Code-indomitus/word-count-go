@@ -52,9 +52,16 @@ func main() {
 	if charCountFlag {
 		fmt.Println(getCharCount(file), fileName)
 	}
+
+	// If no flags are provided, print all
+	if len(os.Args) == 2 {
+		fmt.Println(getLineCount(file), getWordCount(file), getByteCount(file), fileName)
+	}
 }
 
 func getByteCount(file *os.File) int64 {
+	resetFilePointer(file)
+
 	// Read file as a buffer
 	reader := bufio.NewReader(file)
 
@@ -82,6 +89,8 @@ func getByteCount(file *os.File) int64 {
 }
 
 func getLineCount(file *os.File) int64 {
+	resetFilePointer(file)
+
 	// Initialize file scanner
 	fileScanner := bufio.NewScanner(file)
 
@@ -96,6 +105,7 @@ func getLineCount(file *os.File) int64 {
 }
 
 func getWordCount(file *os.File) int64 {
+	resetFilePointer(file)
 	// Initialize file scanner
 	fileScanner := bufio.NewScanner(file)
 
@@ -114,6 +124,7 @@ func getWordCount(file *os.File) int64 {
 
 func getCharCount(file *os.File) int64 {
 	//TODO: Fix faulty character count and newline count
+	resetFilePointer(file)
 
 	// Initialize file scanner
 	fileScanner := bufio.NewScanner(file)
@@ -132,4 +143,12 @@ func getCharCount(file *os.File) int64 {
 	}
 
 	return charCount
+}
+
+func resetFilePointer(file *os.File) {
+	// Reset the file pointer to the beginning of the file
+	_, err := file.Seek(0, 0)
+	if err != nil {
+		fmt.Println("Error:", err)
+	}
 }
